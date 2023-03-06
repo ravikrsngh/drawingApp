@@ -1,0 +1,12 @@
+Type of elements :
+- Circles/ellipse
+- rectangle/square
+- line segment
+- drawn shapes
+- images
+- text
+
+Element Structure
+ {
+    type: Type of element
+ }

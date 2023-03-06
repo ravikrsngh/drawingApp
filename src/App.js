@@ -47,6 +47,14 @@ function App() {
       // Creating a rectangle
       ctx.fillStyle = "#E9E9E9";
       ctx.fillRect(x1,y1,x2-x1,y2-y1)
+    }else if (type == "stroke-line") {
+      // Creating a select line
+      ctx.beginPath();
+      ctx.strokeStyle="#ACCEF7"
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.closePath()
     } else if (type == "stroke-rectangle") {
       // Creating a stroke rectangle
       ctx.strokeStyle="#ACCEF7"
@@ -84,21 +92,31 @@ function App() {
           y1:minY,
           y2:maxY
         }
-        if (isElement) {
-          return {
-            isElement: isElement,
-            boundingBox:boundingBox,
-            element:element
-          }
-        }
+        
       } else if (element.type == "line") {
-        return {
-          isElement:false
+        let minX = Math.min(element.x1,element.x2)
+        let maxX = Math.max(element.x1,element.x2)
+        let minY = Math.min(element.y1,element.y2)
+        let maxY = Math.max(element.y1,element.y2)
+        isElement= x >= minX && x<=maxX && y>= minY && y<=maxY
+        boundingBox = {
+          type:"stroke-line",
+          x1:minX,
+          x2:maxX,
+          y1:minY,
+          y2:maxY
         }
       } else if (element.type == "circle") {
         return {
           isElement:false
       }
+      }
+      if(isElement) {
+        return {
+          isElement: isElement,
+          boundingBox:boundingBox,
+          element:element
+        }
       }
     }
     return {
@@ -148,13 +166,14 @@ function App() {
   }
 
   const handleMouseMove = (e) => {
+    const {clientX,clientY} = e
     if(!drawing) {
       return
+    } else if(elementType == "select" && selectedElement) {
+       
     }
 
     let {x1,y1,x2,y2} = elements[elements.length -1]
-
-    const {clientX,clientY} = e
     let ele = createElement(elementType,x1,y1,clientX - canvasRef.current.offsetLeft,clientY - canvasRef.current.offsetTop)
 
     let eleCopy = [...elements]

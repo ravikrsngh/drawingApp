@@ -12,14 +12,38 @@ const newApp = () => {
 
 
   const createElement = (elementType,x1,y1,x2,y2,styles,data) => {
-    switch(elementType) {
-      case "line":
-      
-    }
+    return {elementType,x1,y1,x2,y2,styles,data}
   }
 
-  const drawElement = () => {
-
+  const drawElement = ({elementType,x1,y1,x2,y2,styles,data}) => {
+    switch (elementType) {
+      case "line":
+        ctx.beginPath();
+        ctx.strokeStyle="#000"
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.closePath()
+        break;
+      case "rectangle":
+        ctx.fillStyle = "#E9E9E9";
+        ctx.fillRect(x1,y1,x2-x1,y2-y1)
+        break;
+      case "stroke-rectangle":
+        ctx.strokeStyle="#ACCEF7"
+        ctx.strokeRect(x1,y1,x2-x1,y2-y1)
+        break;
+      case "circle":
+        let radius = Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2))
+        ctx.beginPath();
+        ctx.strokeStyle="#000"
+        ctx.arc(x1, y1, radius,0, Math.PI * 2, true);
+        ctx.stroke()
+        ctx.closePath()
+        break;
+      case "image":
+        ctx.drawImage(data.obj, 0, 0);
+    }
   }
 
   const handleMouseDown = (e) => {
