@@ -10,3 +10,49 @@ Element Structure
  {
     type: Type of element
  }
+
+
+
+ {
+   top:{
+     x1:clientX -  canvasRef.current.offsetLeft,
+     y1:clientY - canvasRef.current.offsetTop,
+     x2:clientX -  canvasRef.current.offsetLeft,
+     y2:clientY - canvasRef.current.offsetTop
+   },
+   bottom:{
+     x1:clientX -  canvasRef.current.offsetLeft,
+     y1:clientY - canvasRef.current.offsetTop,
+     x2:clientX -  canvasRef.current.offsetLeft,
+     y2:clientY - canvasRef.current.offsetTop
+   },
+   left:{
+     x1:clientX -  canvasRef.current.offsetLeft,
+     y1:clientY - canvasRef.current.offsetTop,
+     x2:clientX -  canvasRef.current.offsetLeft,
+     y2:clientY - canvasRef.current.offsetTop
+   },
+   right:{
+     x1:clientX -  canvasRef.current.offsetLeft,
+     y1:clientY - canvasRef.current.offsetTop,
+     x2:clientX -  canvasRef.current.offsetLeft,
+     y2:clientY - canvasRef.current.offsetTop
+   },
+   topLeft:{
+     x:clientX -  canvasRef.current.offsetLeft,
+     y:clientY - canvasRef.current.offsetTop
+   },
+   topRight:{
+     x:clientX -  canvasRef.current.offsetLeft,
+     y:clientY - canvasRef.current.offsetTop
+   },
+   bottomLeft:{
+     x:clientX -  canvasRef.current.offsetLeft,
+     y:clientY - canvasRef.current.offsetTop
+   },
+   bottomRight:{
+     x:clientX -  canvasRef.current.offsetLeft,
+     y:clientY - canvasRef.current.offsetTop
+   }
+ },
+ {},
