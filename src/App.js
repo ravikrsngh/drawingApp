@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { useLayoutEffect, useEffect, useState, useRef } from 'react';
 import cardicon from './cardicon.png';
-
+import Layer from './components/layer/layer';
 
 function App() {
   const [elementType,setElementType] = useState(null)
@@ -12,8 +12,42 @@ function App() {
   const [selectedElement,setSelectedElement] = useState(null)
   const [resizeElement,setResizeElement] = useState(null)
   const [ctx,setctx] = useState(null)
+  const [searchResult,setSearchResult] = useState([])
   const canvasRef = useRef()
   const textAreaRef = useRef();
+
+  const setBackground = (img) => {
+    const element = document.getElementById('canvas_wrapper');
+    element.style.backgroundImage = `url('${img}')`;
+    element.style.backgroundPosition = 'center';
+    element.style.backgroundRepeat = 'no-repeat';
+    element.style.backgroundSize = 'cover';
+  }
+  const setBackgroundPosition = (pos) => {
+    const element = document.getElementById('canvas_wrapper');
+    element.style.backgroundPosition = pos;
+  }
+  const setBackgroundSize = (pos) => {
+    const element = document.getElementById('canvas_wrapper');
+    element.style.backgroundSize = pos;
+  }
+
+  const searchUnsplashImages = async (e) => {
+    e.preventDefault()
+    console.log(e.target.search.value)
+    let accessKey = 'dqSeyQ2g_HMdOVHAPGVKtCnS2YcgKejOAAlrJ2JXkJM'
+    const url = `https://api.unsplash.com/search/photos?query=${e.target.search.value}&client_id=${accessKey}`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      console.log(data.results);
+      setSearchResult(data.results)
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+
 
   // const getDraggedCorner = (element,x,y) => {
   //
@@ -138,6 +172,7 @@ function App() {
   const updateResizeElemet = (element,diff,from) => {
     const {id, x1, y1, x2, y2, type,options} = element
     const elementsCopy = [...elements];
+    const index = elementsCopy.findIndex(obj => obj.id === id);
     let newX1 = x1
     let newY1 = y1
     let newX2 = x2
@@ -151,7 +186,7 @@ function App() {
           newX2 += diff.x
           newY2 += diff.y
         }
-        elementsCopy[id] = createElement(id,type, newX1, newY1, newX2, newY2,{} );
+        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,{} );
         break;
       case "rectangle":
         if (from == "tl") {
@@ -168,7 +203,7 @@ function App() {
           newX2 += diff.x
           newY2 += diff.y
         }
-        elementsCopy[id] = createElement(id,type, newX1, newY1, newX2, newY2,{} );
+        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,{} );
         break;
       case "img":
         console.log("here")
@@ -196,7 +231,7 @@ function App() {
           newX2 = element.data.width + newX1
           newY2 = element.data.height + newY1
         }
-        elementsCopy[id] = createElement(id,type, newX1, newY1, newX2, newY2,element.data);
+        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,element.data);
         break;
       // case "pencil":
       //   elementsCopy[id].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
@@ -220,8 +255,9 @@ function App() {
   }
 
   const updateMovingElement = (element,drag) => {
-    const {id, x1, y1, x2, y2, type,options} = element
+    const {id, x1, y1, x2, y2, type, options} = element
     const elementsCopy = [...elements];
+    const index = elementsCopy.findIndex(obj => obj.id === id);
     let newX1 = 0
     let newY1 = 0
     let newX2 = 0
@@ -234,7 +270,7 @@ function App() {
         newY1 = y1 + drag.y
         newX2 = newX1 + x2-x1
         newY2 = newY1 + y2-y1
-        elementsCopy[id] = createElement(id,type, newX1, newY1, newX2, newY2,{} );
+        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,{} );
         break;
       case "img":
         console.log("here")
@@ -242,10 +278,10 @@ function App() {
         newY1 = y1 + drag.y
         newX2 = x2 + drag.x
         newY2 = y2 + drag.y
-        elementsCopy[id] = createElement(id,type, newX1, newY1, newX2, newY2,element.data);
+        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,element.data);
         break;
       case "pencil":
-        elementsCopy[id].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
+        elementsCopy[index].points = [...elementsCopy[id].points, { x: x2, y: y2 }];
         break;
       case "text":
         const textWidth = document
@@ -253,7 +289,7 @@ function App() {
           .getContext("2d")
           .measureText(element.data.text).width;
         const textHeight = 24;
-        elementsCopy[id] = {
+        elementsCopy[index] = {
           ...createElement(id,type, x1+drag.x, y1+drag.y, x1 + textWidth, y1 + textHeight,element.data)
         };
         break;
@@ -266,12 +302,13 @@ function App() {
 
   const updateTextElement = (id, x1, y1, x2, y2, type,options) => {
     const elementsCopy = [...elements];
+    const index = elementsCopy.findIndex(obj => obj.id === id);
     const textWidth = document
       .getElementById("canvas1")
       .getContext("2d")
       .measureText(options.text).width;
     const textHeight = 24;
-    elementsCopy[id] = {
+    elementsCopy[index] = {
       ...createElement(id, type,x1, y1, x1 + textWidth, y1 + textHeight,{text: options.text})
     };
     setElements(elementsCopy);
@@ -365,7 +402,7 @@ function App() {
     let isElement = false
     let boundingBox = null
     for (var i = 0; i < elements.length; i++) {
-      let element = elements[i]
+      let element = elements[elements.length - i - 1]
       if (element.type == "rectangle" || element.type == "img") {
         let minX = Math.min(element.x1,element.x2)
         let maxX = Math.max(element.x1,element.x2)
@@ -396,11 +433,17 @@ function App() {
       } else if (element.type == "circle") {
         continue
       } else if (element.type == "text") {
+        console.log("Checking Text")
         let minX = Math.min(element.x1 - canvasRef.current.offsetLeft,element.x2 - canvasRef.current.offsetLeft)
         let maxX = Math.max(element.x1 - canvasRef.current.offsetLeft,element.x2 - canvasRef.current.offsetLeft)
         let minY = Math.min(element.y1 - canvasRef.current.offsetTop,element.y2 - canvasRef.current.offsetTop)
         let maxY = Math.max(element.y1 - canvasRef.current.offsetTop,element.y2 - canvasRef.current.offsetTop)
+        console.log(element);
+        console.log(element.x1,element.y1,element.x2,element.y2);
+        console.log(minX,maxX,minX,maxY);
+        console.log(x,y);
         isElement= x >= minX && x <=maxX && y >= minY && y <=maxY
+        console.log(isElement);
       }
       if(isElement) {
         return {
@@ -462,6 +505,7 @@ function App() {
         clientX -  canvasRef.current.offsetLeft,
         clientY - canvasRef.current.offsetTop,
       )
+      console.log(elements);
       console.log(isElement);
       if (isElement) {
         document.body.style.cursor = 'move';
@@ -471,6 +515,7 @@ function App() {
           element:{...element,offsetX,offsetY},
           boundingBox:boundingBox
         })
+        console.log(selectedElement);
       } else {
         setSelectedElement(null)
       }
@@ -494,6 +539,7 @@ function App() {
 
   const handleMouseUp = (e) => {
     if (selectedElement) {
+      console.log(selectedElement);
       console.log("Text Mouse Up");
       if (selectedElement.type === "text") {
         setActionType("writing");
@@ -562,6 +608,7 @@ function App() {
 
   return (
     <div className="App">
+      <div className='canvas_wrapper' id="canvas_wrapper">
       <canvas
         id='canvas1'
         width="700"
@@ -573,6 +620,49 @@ function App() {
       >
         This is main Canvas
       </canvas>
+      </div>
+      
+      {elementType == 'background'? (
+        <>
+          <div className='tool_settings'>
+            <h4>Choose background</h4>
+            <form action="" onSubmit={searchUnsplashImages}>
+              <div className='form_cntainer'>
+                <input type="text" name="search" placeholder='Search Background' required/>
+                <button type='submit'>Search</button>
+              </div>
+              <span>Or</span>
+              <label htmlFor="choose_bgimg">Choose Image</label>
+              <input type="file" id="choose_bgimg" />
+            </form>
+            <div className='tool_settings_gallery'>
+              {
+                searchResult.map((ins) => {
+                  return (
+                    <div className='tool_settings_gallery_img' onClick={() => setBackground(ins.urls.regular)}>
+                      <img src={ins.urls.small} alt="" />
+                    </div>
+                  )
+                })
+              }
+              
+            </div>
+            <div className='tool_properties'>
+              <h4>Position</h4>
+              <span onClick={() => setBackgroundPosition('top left')}>Top left</span>
+              <span onClick={() => setBackgroundPosition('top right')}>Top Right</span>
+              <span onClick={() => setBackgroundPosition('bottom left')}>Bottom left</span>
+              <span onClick={() => setBackgroundPosition('bottom right')}>Bottom Right</span>
+              <span onClick={() => setBackgroundPosition('center')}>Center</span>
+              <br />
+              <h4>Size</h4>
+              <span onClick={() => setBackgroundSize('auto')}>Auto</span>
+              <span onClick={() => setBackgroundSize('cover')}>Cover</span>
+              <span onClick={() => setBackgroundSize('contain')}>Contain</span>
+            </div>
+          </div>
+        </>
+      ):null}
       {actionType === "writing" ? (
         <textarea
           ref={textAreaRef}
@@ -618,9 +708,15 @@ function App() {
           <img src={cardicon} />
           <span>Select</span>
         </div>
+        <div className="toolbar_card" onClick={() => setElementType('background')}>
+          <img src={cardicon} />
+          <span>Background</span>
+        </div>
       </div>
+      <Layer data={elements} dataHandler={setElements} />
     </div>
   );
+  
 }
 
 export default App;

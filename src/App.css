@@ -15,13 +15,21 @@ body {
   justify-content: center;
   align-items: center;
 }
-
+.canvas_wrapper {
+  background-color: white;
+}
 #canvas1 {
-  background-color: #fff;
+
+}
+.canvas_class {
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Image_created_with_a_mobile_phone.png/640px-Image_created_with_a_mobile_phone.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 .toolbar {
   position: fixed;
-  top: 80px;
+  top: 30px;
   left: 0;
   padding: 20px 10px;
   background: white;
@@ -40,4 +48,60 @@ body {
   width: 0;
   height: 0;
   overflow:hidden;
+}
+
+
+
+.tool_settings {
+  position: fixed;
+  width: 300px;
+  top: 100px;
+  left: 100px;
+  background-color: white;
+  z-index: 9;
+  padding: 20px 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
+.tool_settings h4 {
+  margin-bottom: 16px;
+}
+.tool_settings form input {
+  width: 100%;
+  display: block;
+  padding: 8px 10px;
+  margin-bottom: 5px;
+}
+.tool_settings form button {
+  padding: 5px 30px;
+  margin-bottom: 16px;
+}
+.tool_settings form label {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+  background-color: #E9E9E9;
+  padding: 10px 0;
+}
+.tool_settings form #choose_bgimg {
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.tool_settings_gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10xp;
+  max-height: 250px;
+  overflow: scroll;
+}
+.tool_settings_gallery img {
+  width: 100%;
+}
+
+.tool_properties {
+  margin-top: 16px;
+}
+.tool_properties span {
+  display: block;
 }
