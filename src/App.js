@@ -3,11 +3,13 @@ import './App.css';
 import { useLayoutEffect, useEffect, useState, useRef } from 'react';
 import cardicon from './cardicon.png';
 import Layer from './components/layer/layer';
+import TextWorkFlow from './workflows/textWorkflow';
 
 function App() {
   const [elementType,setElementType] = useState(null)
   const [actionType,setActionType] = useState(null)
   const [elements,setElements] = useState([])
+  const [history,setHistory] = useState([])
   const [drawing,setDrawing] = useState(false)
   const [selectedElement,setSelectedElement] = useState(null)
   const [resizeElement,setResizeElement] = useState(null)
@@ -15,6 +17,9 @@ function App() {
   const [searchResult,setSearchResult] = useState([])
   const canvasRef = useRef()
   const textAreaRef = useRef();
+  const [animationStartTime,setAnimationStartTime] = useState(null)
+  const [animationTimeline, setAnimationTimeline] = useState([])
+  const [animationFrame,setAnimationFrame] = useState([])
 
   const setBackground = (img) => {
     const element = document.getElementById('canvas_wrapper');
@@ -47,7 +52,71 @@ function App() {
     }
   }
 
+  const getDefaultStyleForText = (type) => {
+    if (type == 1 || type == 4) {
+      return {
+        color:"black",
+        fontStyle:"Arial",
+        fontSize:"24px",
+        fontBold: false,
+        fontItalic: false,
+        textAlign: "left",
+        letterSpacing:0,
+        lineHeight: 32,
+        opacity:1,
+        lineWidth:0,
+        strokeStyle:"",
+        shadowColor: "",
+        shadowBlur: 0,
+        shadowOffsetX:0,
+        shadowOffsetY:0,
+      }
+    } else if(type == 2) {
+      return {
+        color:"black",
+        fontStyle:"Arial",
+        fontSize:"48px",
+        fontBold: true,
+        fontItalic: false,
+        textAlign: "center",
+        letterSpacing:0,
+        lineHeight: 60,
+        opacity:1,
+        lineWidth:0,
+        strokeStyle:"",
+        shadowColor: "",
+        shadowBlur: 0,
+        shadowOffsetX:0,
+        shadowOffsetY:0,
+      }
+    } else if(type == 3) {
+      return {
+        color:"black",
+        fontStyle:"Arial",
+        fontSize:"24px",
+        fontBold: true,
+        fontItalic: false,
+        textAlign: "center",
+        letterSpacing:0,
+        lineHeight: 36,
+        opacity:1,
+        lineWidth:0,
+        strokeStyle:"",
+        shadowColor: "",
+        shadowBlur: 0,
+        shadowOffsetX:0,
+        shadowOffsetY:0,
+      }
+    } 
+  }
 
+  const createHistory = () => {
+    console.log("New set");
+    console.log(elements);
+    let new_arr = history
+    new_arr.push(elements)
+    setHistory(new_arr)
+  }
 
   // const getDraggedCorner = (element,x,y) => {
   //
@@ -254,7 +323,7 @@ function App() {
     setElements(elementsCopy);
   }
 
-  const updateMovingElement = (element,drag) => {
+  const updateMovingElement = (element,drag,aspect="add") => {
     const {id, x1, y1, x2, y2, type, options} = element
     const elementsCopy = [...elements];
     const index = elementsCopy.findIndex(obj => obj.id === id);
@@ -288,16 +357,18 @@ function App() {
           .getElementById("canvas1")
           .getContext("2d")
           .measureText(element.data.text).width;
-        const textHeight = 24;
+        const textHeight = element.data.style.lineHeight;
         elementsCopy[index] = {
-          ...createElement(id,type, x1+drag.x, y1+drag.y, x1 + textWidth, y1 + textHeight,element.data)
+          ...createElement(id,type, x1+drag.x, y1+drag.y, x1+drag.x + textWidth, y1+drag.y + textHeight,element.data)
         };
         break;
       default:
         throw new Error(`Type not recognised: ${type}`);
     }
-    console.log(elementsCopy);
-    setElements(elementsCopy);
+    if (aspect == "add") {
+      console.log(elementsCopy);
+      setElements(elementsCopy); 
+    }
   };
 
   const updateTextElement = (id, x1, y1, x2, y2, type,options) => {
@@ -307,11 +378,13 @@ function App() {
       .getElementById("canvas1")
       .getContext("2d")
       .measureText(options.text).width;
-    const textHeight = 24;
+    const textHeight = options.style.lineHeight;
+    console.log(textHeight);
     elementsCopy[index] = {
-      ...createElement(id, type,x1, y1, x1 + textWidth, y1 + textHeight,{text: options.text})
+      ...createElement(id, type,x1, y1, x1 + textWidth, y1 + textHeight,{text: options.text, style:options.style})
     };
     setElements(elementsCopy);
+    createHistory()
   };
 
   const onChangeInputImageHandler = (e) =>{
@@ -341,6 +414,10 @@ function App() {
         setElements((prev) => {
           return [...prev,ele]
         })
+        let new_ele_arr = [...elements, ele]
+        let new_arr = history
+        new_arr.push(new_ele_arr)
+        setHistory(new_arr)
       }
     }
   }
@@ -361,6 +438,7 @@ function App() {
       ctx.closePath()
     } else if (type == "rectangle") {
       // Creating a rectangle
+      console.log(type,x1,y1,x2,y2,data);
       ctx.fillStyle = "#E9E9E9";
       ctx.fillRect(x1,y1,x2-x1,y2-y1)
     }else if (type == "stroke-line") {
@@ -388,10 +466,23 @@ function App() {
     } else if (type == "text") {
       console.log("here");
       ctx.textBaseline = "top";
-      ctx.font = "24px sans-serif";
       if (data?.text) {
-        console.log("Text there");
-        ctx.fillText(data.text,x1-canvasRef.current.offsetLeft,y1-canvasRef.current.offsetTop);
+        console.log(data);
+        ctx.direction = "ltr";
+        ctx.fillStyle=data.style.color
+        console.log(data.style.fontBold);
+        ctx.font = `${data.style.fontItalic ? "italic " : ''}${data.style.fontBold ? "bold " : ''}${data.style.fontSize} ${data.style.fontStyle}`
+        ctx.textAlign= data.style.textAlign
+        ctx.letterSpacing=data.style.letterSpacing
+        ctx.lineHeight= data.style.lineHeight
+        ctx.opacity=1
+        ctx.lineWidth=data.style.lineWidth
+        ctx.strokeStyle=data.style.strokeStyle
+        ctx.shadowColor= data.style.shadowColor
+        ctx.shadowBlur= data.style.shadowBlur
+        ctx.shadowOffsetX= data.style.shadowOffsetX
+        ctx.shadowOffsetY= data.style.shadowOffsetY
+        ctx.fillText(data.text,x1,y1);
       }
 
     }
@@ -434,10 +525,10 @@ function App() {
         continue
       } else if (element.type == "text") {
         console.log("Checking Text")
-        let minX = Math.min(element.x1 - canvasRef.current.offsetLeft,element.x2 - canvasRef.current.offsetLeft)
-        let maxX = Math.max(element.x1 - canvasRef.current.offsetLeft,element.x2 - canvasRef.current.offsetLeft)
-        let minY = Math.min(element.y1 - canvasRef.current.offsetTop,element.y2 - canvasRef.current.offsetTop)
-        let maxY = Math.max(element.y1 - canvasRef.current.offsetTop,element.y2 - canvasRef.current.offsetTop)
+        let minX = Math.min(element.x1,element.x2)
+        let maxX = Math.max(element.x1,element.x2)
+        let minY = Math.min(element.y1,element.y2)
+        let maxY = Math.max(element.y1,element.y2)
         console.log(element);
         console.log(element.x1,element.y1,element.x2,element.y2);
         console.log(minX,maxX,minX,maxY);
@@ -466,11 +557,14 @@ function App() {
       let ele = createElement(
         elements.length,
         elementType,
+        clientX - canvasRef.current.offsetLeft,
+        clientY - canvasRef.current.offsetTop,
         clientX,
         clientY,
-        clientX,
-        clientY,
-        {},
+        {
+          text:'',
+          style:getDefaultStyleForText(1)
+        },
       )
       setElements((prev) => {
         return [...prev,ele]
@@ -546,8 +640,14 @@ function App() {
         return;
       }
     }
+    if(elementType == "select" && selectedElement && actionType == "moving") {
+      createHistory()
+    }
+    if (elementType == "select" && resizeElement && actionType == "resize") {
+      createHistory()
+    }
     if (drawing) {
-
+      createHistory()
     }
     if (actionType === "writing") return;
     setDrawing(false)
@@ -584,12 +684,78 @@ function App() {
   }
 
   const handleBlur = event => {
-    const { id, x1, y1, type } = selectedElement.element;
-
+    const { id, x1, y1, type , data } = selectedElement.element;
+    console.log(x1,y1)
     setActionType(null);
     setSelectedElement(null);
-    updateTextElement(id, x1, y1, null, null, type, { text: textAreaRef.current.value });
+    updateTextElement(id, x1, y1, null, null, type, { text: textAreaRef.current.value, style:data.style });
+    setElementType('select')
   };
+
+  const undo = () => {
+    console.log("History");
+    console.log(history);
+    let last = []
+    if (history.length > 0) {
+      last = history.pop()
+    }
+    setElements(last)
+  }
+
+  const deleteSelected = () => {
+    if (selectedElement) {
+      let idToDelete = selectedElement.element.id
+      let new_arr = elements.filter(item => item.id !== idToDelete);
+      setElements(new_arr)
+    }
+  }
+
+  const handleKeyPress = (event) => {
+    console.log(event);
+    if (event.keyCode === 90 && event.ctrlKey) {
+      // Handle control Z keydown event
+      undo();
+    } else if (event.keyCode === 46) {
+      // Handle delete keydown event
+      deleteSelected();
+    }
+  }
+
+  const generateFrame = (currentTime,start) => {
+    animationTimeline.push({
+      element:elements[0],
+      to:{
+        x1:0,
+        y1:0
+      },
+      duration:2000,
+      delay:0
+    })
+    const elementsCopy = [...elements];
+    for (let i = 0; i < animationTimeline.length; i++) {
+      const element = animationTimeline[i].element;
+      let progress = (currentTime - start)/animationTimeline[i].duration
+      if (progress <= 1) {
+        console.log("Progress",progress);
+        element.x1 = (element.x1 - animationTimeline[i].to.x1)*progress
+        element.y1 = (element.y1 - animationTimeline[i].to.y1)*progress
+        const index = elementsCopy.findIndex(obj => obj.id === element.id);
+        elementsCopy[index] = element
+        setAnimationFrame(elementsCopy)
+      }
+    }
+  }
+
+  const animate = (start) => {
+    let currentTime = new Date()
+    generateFrame(currentTime,start)
+    requestAnimationFrame(animate(start));
+  }
+
+  const StartAnimation = () => {
+    let start = new Date()
+    requestAnimationFrame(animate(start));
+  }
 
   useEffect(() => {
     console.log(elements);
@@ -605,6 +771,20 @@ function App() {
     // }
   }, [elements])
 
+  useEffect(() => {
+    console.log(elements);
+    const canvas = document.getElementById("canvas1")
+    const ctx1 = canvas.getContext('2d')
+    setctx(ctx1)
+    ctx1.clearRect(0,0,canvas.width,canvas.height)
+    animationFrame.forEach(element => {
+      drawElement(element.type, element.x1,element.y1,element.x2,element.y2,element.data)
+    });
+    // if (selectedElement) {
+    //   drawElement(selectedElement.boundingBox.type, selectedElement.boundingBox.x1,selectedElement.boundingBox.y1,selectedElement.boundingBox.x2,selectedElement.boundingBox.y2,{})
+    // }
+  }, [animationFrame])
+
 
   return (
     <div className="App">
@@ -616,6 +796,8 @@ function App() {
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
+        tabIndex={0}
+        onKeyDown={handleKeyPress}
         ref={canvasRef}
       >
         This is main Canvas
@@ -669,8 +851,8 @@ function App() {
           onBlur={handleBlur}
           style={{
             position: "fixed",
-            top: selectedElement.element.y1 - 2,
-            left: selectedElement.element.x1,
+            top: selectedElement.element.y1 + canvasRef.current.offsetTop,
+            left: selectedElement.element.x1 + canvasRef.current.offsetLeft,
             font: "24px sans-serif",
             margin: 0,
             padding: 0,
@@ -679,6 +861,8 @@ function App() {
             overflow: "hidden",
             whiteSpace: "pre",
             background: "transparent",
+            width:"auto",
+            height:"auto"
           }}
         />
       ) : null}
@@ -712,8 +896,13 @@ function App() {
           <img src={cardicon} />
           <span>Background</span>
         </div>
+        <div className="toolbar_card" onClick={() => StartAnimation()}>
+          <img src={cardicon} />
+          <span>Animation</span>
+        </div>
       </div>
       <Layer data={elements} dataHandler={setElements} />
+      <TextWorkFlow  elements={elements} selectelementHandler={setSelectedElement} createElement={createElement} actionhandler={setActionType} elementsHandler={setElements} stage={2} />
     </div>
   );
   
