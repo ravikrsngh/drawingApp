@@ -5,6 +5,191 @@ import cardicon from './cardicon.png';
 import Layer from './components/layer/layer';
 import TextWorkFlow from './workflows/textWorkflow';
 
+
+const createElement = (id,type,x1,y1,x2,y2,data) => {
+  console.log(data);
+  return {id,type,x1,y1,x2,y2,data}
+}
+
+
+const EditPanel = ({element, elements, elementsHandler}) => {
+
+  const changeElementStyle = (e) => {
+    e.preventDefault()
+    const formData = new FormData(e.target);
+    const formDataObj = {};
+
+    for (const [key, value] of formData.entries()) {
+      formDataObj[key] = value;
+    }
+    console.log(formDataObj);
+    const elementsCopy = [...elements];
+    const index = elementsCopy.findIndex(obj => obj.id === element.element.id);
+    let data = {style:formDataObj}
+    if (element.element.type == "img") {
+      data = {
+        obj:element.element.data.obj,
+        width:element.element.data.width,
+        height:element.element.data.height,
+        ar:element.element.data.ar,
+        style:formDataObj
+      }
+    }
+    if (element.element.type == "text") {
+      data = {
+        text:element.element.data.text,
+        style:{...element.element.data.style,...formDataObj}
+      }
+    }
+    elementsCopy[index] = createElement(element.element.id,element.element.type, element.element.x1, element.element.y1, element.element.x2, element.element.y2,data);
+    elementsHandler(elementsCopy)
+  }
+
+  console.log(element);
+  if(element?.element.type == "rectangle"){
+    return (
+      <div className="edit_panel_container">
+        <form onSubmit={changeElementStyle}>
+          <div>
+            <label>Color</label>
+            <input type="text" name='fillStyle' defaultValue={element?.element.data.style.fillStyle} />
+          </div>
+          <div>
+            <label>Border Color</label>
+            <input type="text" name='strokeStyle' defaultValue={element?.element.data.style.strokeStyle} />
+          </div>
+          <div>
+            <label>Border Thickness</label>
+            <input type="number" name='lineWidth' defaultValue={element?.element.data.style.lineWidth} />
+          </div>
+          <div>
+            <label>Shadow Color</label>
+            <input type="text" name='shadowColor' defaultValue={element?.element.data.style.shadowColor} />
+          </div>
+          <div>
+            <label>Shadow Blur</label>
+            <input type="number" name='shadowBlur' defaultValue={element?.element.data.style.shadowBlur} />
+          </div>
+          <div>
+            <label>Shadow Offset X</label>
+            <input type="number" name='shadowOffsetX' defaultValue={element?.element.data.style.shadowOffsetX} />
+          </div>
+          <div>
+            <label>Shadow Offset Y</label>
+            <input type="number" name='shadowOffsetY' defaultValue={element?.element.data.style.shadowOffsetY} />
+          </div>
+          <div>
+            <label>Opacity</label>
+            <input type="text" name='globalAlpha' defaultValue={element?.element.data.style.globalAlpha} />
+          </div>
+          <button type='submit'>Apply</button>
+        </form>
+      </div>
+    )
+  } else if(element?.element.type == "line"){
+    return (
+      <div className="edit_panel_container">
+        <form onSubmit={changeElementStyle}>
+          <div>
+            <label>Line Color</label>
+            <input type="text" name='strokeStyle' defaultValue={element?.element.data.style.strokeStyle} />
+          </div>
+          <div>
+            <label>Line Width</label>
+            <input type="number" name='lineWidth' defaultValue={element?.element.data.style.lineWidth} />
+          </div>
+          <div>
+            <label>Opacity</label>
+            <input type="text" name='globalAlpha' defaultValue={element?.element.data.style.globalAlpha} />
+          </div>
+          <button type='submit'>Apply</button>
+        </form>
+      </div>
+    )
+  } else if(element?.element.type == "img"){
+    return (
+      <div className="edit_panel_container">
+        <form onSubmit={changeElementStyle}>
+          <div>
+            <label>Shadow Color</label>
+            <input type="text" name='shadowColor' defaultValue={element?.element.data.style.shadowColor} />
+          </div>
+          <div>
+            <label>Shadow Blur</label>
+            <input type="number" name='shadowBlur' defaultValue={element?.element.data.style.shadowBlur} />
+          </div>
+          <div>
+            <label>Shadow Offset X</label>
+            <input type="number" name='shadowOffsetX' defaultValue={element?.element.data.style.shadowOffsetX} />
+          </div>
+          <div>
+            <label>Shadow Offset Y</label>
+            <input type="number" name='shadowOffsetY' defaultValue={element?.element.data.style.shadowOffsetY} />
+          </div>
+          <div>
+            <label>Opacity</label>
+            <input type="text" name='globalAlpha' defaultValue={element?.element.data.style.globalAlpha} />
+          </div>
+          <button type='submit'>Apply</button>
+        </form>
+      </div>
+    )
+  } else if(element?.element.type == "text"){
+    return (
+      <div className="edit_panel_container">
+        <form onSubmit={changeElementStyle}>
+          <div>
+            <label>Color</label>
+            <input type="text" name='color' defaultValue={element?.element.data.style.color} />
+          </div>
+          <div className='font_edit_container'>
+            <label htmlFor="">Font</label>
+            <div className='font_edit_ib'><input type="checkbox" name='fontItalic' defchecked={element?.element.data.style.fontItalic}/>Italic</div>
+            <div className='font_edit_ib'><input type="checkbox" name='fontBold' defchecked={element?.element.data.style.fontBold}/>Bold</div>
+          </div>
+          <div>
+            <label>Font Style</label>
+            <select name="fontStyle" id="">
+              <option value={element?.element.data.style.fontStyle} selected>{element?.element.data.style.fontStyle}</option>
+              <option value="Verdana">Verdana</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="Courier New">Courier New</option>
+              <option value="serif">serif</option>
+              <option value="sans-serif">sans-serif</option>
+            </select>
+          </div>
+          <div>
+            <label>Font Size</label>
+            <input type="text" name='fontSize' defaultValue={element?.element.data.style.fontSize} />
+          </div>
+          <div>
+            <label>Shadow Color</label>
+            <input type="text" name='shadowColor' defaultValue={element?.element.data.style.shadowColor} />
+          </div>
+          <div>
+            <label>Shadow Blur</label>
+            <input type="number" name='shadowBlur' defaultValue={element?.element.data.style.shadowBlur} />
+          </div>
+          <div>
+            <label>Shadow Offset X</label>
+            <input type="number" name='shadowOffsetX' defaultValue={element?.element.data.style.shadowOffsetX} />
+          </div>
+          <div>
+            <label>Shadow Offset Y</label>
+            <input type="number" name='shadowOffsetY' defaultValue={element?.element.data.style.shadowOffsetY} />
+          </div>
+          <button type='submit'>Apply</button>
+        </form>
+      </div>
+    )
+  }
+  return (
+    <>
+    </>
+  )
+}
+
+
 function App() {
   const [elementType,setElementType] = useState(null)
   const [actionType,setActionType] = useState(null)
@@ -239,7 +424,7 @@ function App() {
   const distance = (a, b) => Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 
   const updateResizeElemet = (element,diff,from) => {
-    const {id, x1, y1, x2, y2, type,options} = element
+    const {id, x1, y1, x2, y2, type,data} = element
     const elementsCopy = [...elements];
     const index = elementsCopy.findIndex(obj => obj.id === id);
     let newX1 = x1
@@ -255,7 +440,7 @@ function App() {
           newX2 += diff.x
           newY2 += diff.y
         }
-        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,{} );
+        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,data);
         break;
       case "rectangle":
         if (from == "tl") {
@@ -272,7 +457,7 @@ function App() {
           newX2 += diff.x
           newY2 += diff.y
         }
-        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,{} );
+        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,data);
         break;
       case "img":
         console.log("here")
@@ -324,7 +509,7 @@ function App() {
   }
 
   const updateMovingElement = (element,drag,aspect="add") => {
-    const {id, x1, y1, x2, y2, type, options} = element
+    const {id, x1, y1, x2, y2, type, data} = element
     const elementsCopy = [...elements];
     const index = elementsCopy.findIndex(obj => obj.id === id);
     let newX1 = 0
@@ -339,7 +524,7 @@ function App() {
         newY1 = y1 + drag.y
         newX2 = newX1 + x2-x1
         newY2 = newY1 + y2-y1
-        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,{} );
+        elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,data );
         break;
       case "img":
         console.log("here")
@@ -410,7 +595,17 @@ function App() {
           newHeight = (newWidth / originalWidth) * originalHeight;
         }
 
-        let ele = createElement(elements.length,"img",60,60,newWidth+60,newHeight+60,{obj:img,width:newWidth,height:newHeight,ar:originalHeight/originalWidth})
+        let defaultStyle = {
+          strokeStyle:"",
+          lineWidth:0,
+          shadowColor: "",
+          shadowBlur: 0,
+          shadowOffsetX:0,
+          shadowOffsetY:0,
+          globalAlpha:1
+        }
+
+        let ele = createElement(elements.length,"img",60,60,newWidth+60,newHeight+60,{obj:img,width:newWidth,height:newHeight,ar:originalHeight/originalWidth,style:defaultStyle})
         setElements((prev) => {
           return [...prev,ele]
         })
@@ -422,24 +617,27 @@ function App() {
     }
   }
 
-  const createElement = (id,type,x1,y1,x2,y2,data) => {
-
-    return {id,type,x1,y1,x2,y2,data}
-  }
 
   const drawElement = (type,x1,y1,x2,y2,data) => {
+    
     if (type == "line") {
       //Creating a line
+      for (const property in data.style) {
+        ctx[property] = data.style[property]
+      }
       ctx.beginPath();
-      ctx.strokeStyle="#000"
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
       ctx.stroke();
       ctx.closePath()
     } else if (type == "rectangle") {
       // Creating a rectangle
-      console.log(type,x1,y1,x2,y2,data);
-      ctx.fillStyle = "#E9E9E9";
+      for (const property in data.style) {
+        ctx[property] = data.style[property]
+      }
+      if (data.style.lineWidth > 0) {
+        ctx.strokeRect(x1,y1,x2-x1,y2-y1)
+      }
       ctx.fillRect(x1,y1,x2-x1,y2-y1)
     }else if (type == "stroke-line") {
       // Creating a select line
@@ -462,12 +660,21 @@ function App() {
       ctx.stroke()
       ctx.closePath()
     } else if (type == "img") {
+      for (const property in data.style) {
+        ctx[property] = data.style[property]
+      }
       ctx.drawImage(data.obj, x1, y1,data.width,data.height);
+      if (data.style.lineWidth > 0) {
+        ctx.strokeRect(x1, y1,data.width,data.height)
+      }
     } else if (type == "text") {
       console.log("here");
       ctx.textBaseline = "top";
+      for (const property in data.style) {
+        ctx[property] = data.style[property]
+      }
       if (data?.text) {
-        console.log(data);
+        console.log(type,x1,y1,x2,y2,data);
         ctx.direction = "ltr";
         ctx.fillStyle=data.style.color
         console.log(data.style.fontBold);
@@ -475,13 +682,7 @@ function App() {
         ctx.textAlign= data.style.textAlign
         ctx.letterSpacing=data.style.letterSpacing
         ctx.lineHeight= data.style.lineHeight
-        ctx.opacity=1
-        ctx.lineWidth=data.style.lineWidth
-        ctx.strokeStyle=data.style.strokeStyle
-        ctx.shadowColor= data.style.shadowColor
-        ctx.shadowBlur= data.style.shadowBlur
-        ctx.shadowOffsetX= data.style.shadowOffsetX
-        ctx.shadowOffsetY= data.style.shadowOffsetY
+        ctx.globalAlpha = 1
         ctx.fillText(data.text,x1,y1);
       }
 
@@ -623,7 +824,18 @@ function App() {
         clientY - canvasRef.current.offsetTop,
         clientX -  canvasRef.current.offsetLeft,
         clientY - canvasRef.current.offsetTop,
-        {},
+        {
+          style:{
+            fillStyle:"#F5F5F5",
+            strokeStyle:"#000",
+            lineWidth:0,
+            shadowColor: "",
+            shadowBlur: 0,
+            shadowOffsetX:0,
+            shadowOffsetY:0,
+            globalAlpha:1
+          }
+        },
       )
       setElements((prev) => {
         return [...prev,ele]
@@ -673,8 +885,8 @@ function App() {
     } else if(!drawing) {
       return
     } else {
-      let {id,type,x1,y1,x2,y2} = elements[elements.length -1]
-      let ele = createElement(id,type,x1,y1,clientX - canvasRef.current.offsetLeft,clientY - canvasRef.current.offsetTop)
+      let {id,type,x1,y1,x2,y2,data} = elements[elements.length -1]
+      let ele = createElement(id,type,x1,y1,clientX - canvasRef.current.offsetLeft,clientY - canvasRef.current.offsetTop,data)
 
       let eleCopy = [...elements]
       eleCopy[elements.length -1] = ele
@@ -771,19 +983,19 @@ function App() {
     // }
   }, [elements])
 
-  useEffect(() => {
-    console.log(elements);
-    const canvas = document.getElementById("canvas1")
-    const ctx1 = canvas.getContext('2d')
-    setctx(ctx1)
-    ctx1.clearRect(0,0,canvas.width,canvas.height)
-    animationFrame.forEach(element => {
-      drawElement(element.type, element.x1,element.y1,element.x2,element.y2,element.data)
-    });
-    // if (selectedElement) {
-    //   drawElement(selectedElement.boundingBox.type, selectedElement.boundingBox.x1,selectedElement.boundingBox.y1,selectedElement.boundingBox.x2,selectedElement.boundingBox.y2,{})
-    // }
-  }, [animationFrame])
+  // useEffect(() => {
+  //   console.log(elements);
+  //   const canvas = document.getElementById("canvas1")
+  //   const ctx1 = canvas.getContext('2d')
+  //   setctx(ctx1)
+  //   ctx1.clearRect(0,0,canvas.width,canvas.height)
+  //   animationFrame.forEach(element => {
+  //     drawElement(element.type, element.x1,element.y1,element.x2,element.y2,element.data)
+  //   });
+  //   // if (selectedElement) {
+  //   //   drawElement(selectedElement.boundingBox.type, selectedElement.boundingBox.x1,selectedElement.boundingBox.y1,selectedElement.boundingBox.x2,selectedElement.boundingBox.y2,{})
+  //   // }
+  // }, [animationFrame])
 
 
   return (
@@ -903,6 +1115,7 @@ function App() {
       </div>
       <Layer data={elements} dataHandler={setElements} />
       <TextWorkFlow  elements={elements} selectelementHandler={setSelectedElement} createElement={createElement} actionhandler={setActionType} elementsHandler={setElements} stage={2} />
+      <EditPanel element={selectedElement} elements={elements} elementsHandler={setElements} />
     </div>
   );
   

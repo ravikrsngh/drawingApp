@@ -105,3 +105,35 @@ body {
 .tool_properties span {
   display: block;
 }
+
+
+.edit_panel_container {
+  position: fixed;
+  top: 100px;
+  left: 110px;
+  padding: 16px;
+  background-color: white;
+  width: 240px;
+}
+.edit_panel_container form {
+  display: flex;
+  flex-direction: column;
+  gap:20px;
+}
+.edit_panel_container form input{
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  margin-top: 5px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border: none;
+}
+.font_edit_ib {
+  display: flex;
+  align-items: center;
+}
+.font_edit_ib input {
+  width: auto !important;
+  margin: 0 !important;
+  margin-right: 10px !important;
+}
