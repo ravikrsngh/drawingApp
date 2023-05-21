@@ -107,7 +107,7 @@ body {
 }
 
 
-.edit_panel_container {
+.edit_panel_container, .slideshow_container {
   position: fixed;
   top: 100px;
   left: 110px;
@@ -119,6 +119,9 @@ body {
   display: flex;
   flex-direction: column;
   gap:20px;
+}
+.edit_panel_container form > div {
+  position: relative;
 }
 .edit_panel_container form input{
   display: block;
@@ -137,3 +140,38 @@ body {
   margin: 0 !important;
   margin-right: 10px !important;
 }
+
+
+.slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #E9E9E9;
+  min-height: 100px;
+  overflow: hidden;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+}
+.slide img {
+  width: 100%;
+}
+.slide button {
+  position: absolute;
+  top: 10px;
+  right:10px;
+}
+
+
+.export_options {
+  position: fixed;
+  top: 20px;
+  right:20px;
+}
+
+.color_picker_container {
+  position: absolute;
+  left: 240px;
+}
+

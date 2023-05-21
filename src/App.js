@@ -4,7 +4,24 @@ import { useLayoutEffect, useEffect, useState, useRef } from 'react';
 import cardicon from './cardicon.png';
 import Layer from './components/layer/layer';
 import TextWorkFlow from './workflows/textWorkflow';
+import { ColorPicker, useColor } from "react-color-palette";
+import "react-color-palette/lib/css/styles.css";
 
+
+const exportCanvas = async (filename) => {
+  var c = document.getElementById("canvas1");
+    var img = new Image();
+    img.src = c.toDataURL('image/png',1.0)
+    var link = document.createElement("a");
+    link.href = img.src;
+    link.download = filename;
+    await link.click();
+}
+
+const getPreviewOfSlide = () => {
+  var c = document.getElementById("canvas1");
+  return c.toDataURL('image/png',1.0)
+}
 
 const createElement = (id,type,x1,y1,x2,y2,data) => {
   console.log(data);
@@ -14,6 +31,11 @@ const createElement = (id,type,x1,y1,x2,y2,data) => {
 
 const EditPanel = ({element, elements, elementsHandler}) => {
 
+  const [fillStyle, setFillStyle] = useColor("hex", element?.element.data.style.fillStyle ? element?.element.data.style.fillStyle : '');
+  const [strokeStyle, setStrokeStyle] = useColor("hex", element?.element.data.style.strokeStyle ? element?.element.data.style.strokeStyle : '');
+  const [shadowColor, setShadowColor] = useColor("hex", element?.element.data.style.shadowColor ? element?.element.data.style.shadowColor : '');
+  const [inFocusColorPicker,setInFocusColorPicker] = useState(null)
+
   const changeElementStyle = (e) => {
     e.preventDefault()
     const formData = new FormData(e.target);
@@ -22,7 +44,8 @@ const EditPanel = ({element, elements, elementsHandler}) => {
     for (const [key, value] of formData.entries()) {
       formDataObj[key] = value;
     }
-    console.log(formDataObj);
+
+
     const elementsCopy = [...elements];
     const index = elementsCopy.findIndex(obj => obj.id === element.element.id);
     let data = {style:formDataObj}
@@ -45,42 +68,83 @@ const EditPanel = ({element, elements, elementsHandler}) => {
     elementsHandler(elementsCopy)
   }
 
-  console.log(element);
+  const openColorPicker = (type) => {
+    if (type == "fillStyle") {
+      setInFocusColorPicker("fillStyle")
+    } else if(type == "strokeStyle"){
+      setInFocusColorPicker("strokeStyle")
+    } else if(type == "shadowColor"){
+      setInFocusColorPicker("shadowColor")
+    } else {
+      setInFocusColorPicker(null)
+    }
+  }
+
+  const changeFontSize =  (e) => {
+    document.getElementById('font_size').value = e.target.value
+  }
+
+
   if(element?.element.type == "rectangle"){
+    
     return (
       <div className="edit_panel_container">
         <form onSubmit={changeElementStyle}>
           <div>
             <label>Color</label>
-            <input type="text" name='fillStyle' defaultValue={element?.element.data.style.fillStyle} />
+            <input type="text" name='fillStyle' value={fillStyle.hex} onFocus={() => openColorPicker("fillStyle")} />
+            <div className='color_picker_container'>
+            {
+              inFocusColorPicker == "fillStyle" && <ColorPicker width={456} height={228} 
+                     color={fillStyle} 
+                     onChange={setFillStyle} hideHSV dark />
+            }
+              
+            </div>
           </div>
           <div>
             <label>Border Color</label>
-            <input type="text" name='strokeStyle' defaultValue={element?.element.data.style.strokeStyle} />
+            <input type="text" name='strokeStyle' value={strokeStyle.hex} onFocus={() => openColorPicker("strokeStyle")} />
+            <div className='color_picker_container'>
+            {
+              inFocusColorPicker == "strokeStyle" && <ColorPicker width={456} height={228} 
+                     color={strokeStyle} 
+                     onChange={setStrokeStyle} hideHSV dark />
+            }
+              
+            </div>
           </div>
           <div>
             <label>Border Thickness</label>
-            <input type="number" name='lineWidth' defaultValue={element?.element.data.style.lineWidth} />
+            <input type="number" name='lineWidth' defaultValue={element?.element.data.style.lineWidth} onFocus={() => setInFocusColorPicker(null)} />
           </div>
           <div>
             <label>Shadow Color</label>
-            <input type="text" name='shadowColor' defaultValue={element?.element.data.style.shadowColor} />
+            <input type="text" name='shadowColor' value={shadowColor.hex} onFocus={() => openColorPicker("shadowColor")} />
+            <div className='color_picker_container'>
+            {
+              inFocusColorPicker == "shadowColor" && <ColorPicker width={456} height={228} 
+                     color={shadowColor} 
+                     onChange={setShadowColor} hideHSV dark />
+            }
+              
+            </div>
           </div>
           <div>
             <label>Shadow Blur</label>
-            <input type="number" name='shadowBlur' defaultValue={element?.element.data.style.shadowBlur} />
+            <input type="number" name='shadowBlur' defaultValue={element?.element.data.style.shadowBlur} onFocus={() => setInFocusColorPicker(null)} />
           </div>
           <div>
             <label>Shadow Offset X</label>
-            <input type="number" name='shadowOffsetX' defaultValue={element?.element.data.style.shadowOffsetX} />
+            <input type="number" name='shadowOffsetX' defaultValue={element?.element.data.style.shadowOffsetX} onFocus={() => setInFocusColorPicker(null)} />
           </div>
           <div>
             <label>Shadow Offset Y</label>
-            <input type="number" name='shadowOffsetY' defaultValue={element?.element.data.style.shadowOffsetY} />
+            <input type="number" name='shadowOffsetY' defaultValue={element?.element.data.style.shadowOffsetY} onFocus={() => setInFocusColorPicker(null)} />
           </div>
           <div>
             <label>Opacity</label>
-            <input type="text" name='globalAlpha' defaultValue={element?.element.data.style.globalAlpha} />
+            <input type="text" name='globalAlpha' defaultValue={element?.element.data.style.globalAlpha} onFocus={() => setInFocusColorPicker(null)} />
           </div>
           <button type='submit'>Apply</button>
         </form>
@@ -92,15 +156,23 @@ const EditPanel = ({element, elements, elementsHandler}) => {
         <form onSubmit={changeElementStyle}>
           <div>
             <label>Line Color</label>
-            <input type="text" name='strokeStyle' defaultValue={element?.element.data.style.strokeStyle} />
+            <input type="text" name='strokeStyle' value={strokeStyle.hex} onFocus={() => openColorPicker("strokeStyle")} />
+            <div className='color_picker_container'>
+            {
+              inFocusColorPicker == "strokeStyle" && <ColorPicker width={456} height={228} 
+                     color={strokeStyle} 
+                     onChange={setStrokeStyle} hideHSV dark />
+            }
+              
+            </div>
           </div>
           <div>
             <label>Line Width</label>
-            <input type="number" name='lineWidth' defaultValue={element?.element.data.style.lineWidth} />
+            <input type="number" name='lineWidth' defaultValue={element?.element.data.style.lineWidth} onFocus={() => setInFocusColorPicker(null)} />
           </div>
           <div>
             <label>Opacity</label>
-            <input type="text" name='globalAlpha' defaultValue={element?.element.data.style.globalAlpha} />
+            <input type="text" name='globalAlpha' defaultValue={element?.element.data.style.globalAlpha} onFocus={() => setInFocusColorPicker(null)} />
           </div>
           <button type='submit'>Apply</button>
         </form>
@@ -160,7 +232,15 @@ const EditPanel = ({element, elements, elementsHandler}) => {
           </div>
           <div>
             <label>Font Size</label>
-            <input type="text" name='fontSize' defaultValue={element?.element.data.style.fontSize} />
+            <input type="text" name='fontSize' id="font_size" defaultValue={element?.element.data.style.fontSize} />
+            <select onChange={changeFontSize} id="font_size_select">
+              <option value={element?.element.data.style.fontSize} selected>{element?.element.data.style.fontSize}</option>
+              <option value="8px">8</option>
+              <option value="10px">10</option>
+              <option value="12px">12</option>
+              <option value="14px">14</option>
+              <option value="16px">16</option>
+            </select>
           </div>
           <div>
             <label>Shadow Color</label>
@@ -190,6 +270,105 @@ const EditPanel = ({element, elements, elementsHandler}) => {
 }
 
 
+const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHistory, activeSlide, setActiveSlide, Preview}) => {
+
+  const addNewSlide = () => {
+
+    // const bgElement = document.getElementById('canvas_wrapper');
+    let newSlide = {
+      id:slideshow.length + 1,
+      elements:[],
+      history:[],
+      background: {
+        // backgroundImage: bgElement.styles.backgroundImage,
+        // backgroundPosition: bgElement.styles.backgroundPosition,
+        // backgroundRepeat: bgElement.styles.backgroundRepeat,
+        // backgroundSize: bgElement.styles.backgroundSize
+      },
+      preview:null
+    }
+    setSlideShow((prev) => {
+      let newSlideShowArr = [...prev,newSlide]
+
+      return newSlideShowArr
+    })
+
+    setElements([])
+    setHistory([])
+    setActiveSlide(newSlide.id)
+    // bgElement.style.backgroundImage = ``;
+    // bgElement.style.backgroundPosition = '';
+    // bgElement.style.backgroundRepeat = '';
+    // bgElement.style.backgroundSize = '';
+  }
+
+  const openSlide = (ins) => {
+    setElements(ins.elements)
+    setHistory(ins.history)
+    setActiveSlide(ins.id)
+  }
+
+
+  const deleteSlide = (ins) => {
+
+    let slideshowCopy = [...slideshow]
+    let slideToShow = -1
+
+    for (let i = 0; i < slideshowCopy.length; i++) {
+      if(slideshowCopy[i].id == ins.id) {
+        if(i == 0 && slideshowCopy.length > 1) {
+          slideToShow = 0
+        } else if(i == 0 && slideshowCopy.length == 1) {
+          slideToShow = -1
+        } else {
+          slideToShow = i
+        }
+        slideshowCopy.splice(i,1)
+      }
+    }
+
+    for (let i = 1; i <= slideshowCopy.length; i++) {
+      slideshowCopy[i-1].id = i
+    }
+
+    setSlideShow(slideshowCopy)
+
+    if(slideToShow == -1) {
+      setElements([{
+        id:1,
+        elements:[],
+        history:[],
+        background: {}
+      }])
+      setActiveSlide(1)
+      setHistory([])
+    } else {
+      setElements(slideshowCopy[slideToShow-1].elements)
+      setHistory(slideshowCopy[slideToShow-1].history)
+      setActiveSlide(slideshowCopy[slideToShow-1].id)
+    }
+
+    
+  }
+
+  console.log(slideshow);
+
+  return (
+    <div className="slideshow_container">
+      {slideshow.map((ins) => {
+        return (
+          <div className="slide" onClick={() => openSlide(ins)}>
+            <img src={ins.preview} alt="" />
+          </div>
+        )
+      })}
+      <button onClick={addNewSlide}>Add Slide</button>
+      <button onClick={Preview}>Preview</button>
+    </div>
+  )
+}
+
+
 function App() {
   const [elementType,setElementType] = useState(null)
   const [actionType,setActionType] = useState(null)
@@ -205,6 +384,16 @@ function App() {
   const [animationStartTime,setAnimationStartTime] = useState(null)
   const [animationTimeline, setAnimationTimeline] = useState([])
   const [animationFrame,setAnimationFrame] = useState([])
+
+  const [slideshow, setSlideShow] = useState([{
+    id:1,
+    elements:[],
+    history:[],
+    background: {},
+    preview:null
+  }])
+
+  const [activeSlide, setActiveSlide] = useState(1)
 
   const setBackground = (img) => {
     const element = document.getElementById('canvas_wrapper');
@@ -969,12 +1158,41 @@ function App() {
     requestAnimationFrame(animate(start));
   }
 
+
+  const updateSlide = (activeSlide) => {
+    let slideshowCopy = [...slideshow]
+    for (let i = 0; i < slideshowCopy.length; i++) {
+      const slide = slideshowCopy[i];
+      if(slide.id == activeSlide) {
+        slideshowCopy[i].elements = elements
+        slideshowCopy[i].history = history
+        slideshowCopy[i].preview = getPreviewOfSlide(elements)
+        setSlideShow(slideshowCopy)
+        break
+      }
+    }
+  }
+
+  const exportSlideshow = async () => {
+    for (let i = 0; i < slideshow.length; i++) {
+      const slide = slideshow[i];
+      await setElements(slide.elements)
+      await exportCanvas(`slide_${i+1}.png`)
+    }
+  }
+
+  const Preview = () => {
+    console.log("hey");
+  }
+
   useEffect(() => {
     console.log(elements);
     const canvas = document.getElementById("canvas1")
     const ctx1 = canvas.getContext('2d')
     setctx(ctx1)
     ctx1.clearRect(0,0,canvas.width,canvas.height)
+    ctx1.fillStyle="#fff"
+    ctx1.fillRect(0,0,canvas.width,canvas.height)
     elements.forEach(element => {
       drawElement(element.type, element.x1,element.y1,element.x2,element.y2,element.data)
     });
@@ -1108,14 +1326,36 @@ function App() {
           <img src={cardicon} />
           <span>Background</span>
         </div>
-        <div className="toolbar_card" onClick={() => StartAnimation()}>
+        <div className="toolbar_card" onClick={() => {
+          updateSlide(activeSlide)
+          setSelectedElement(null)
+          setElementType('slideshow')
+        }}>
           <img src={cardicon} />
-          <span>Animation</span>
+          <span>Slideshow</span>
         </div>
       </div>
+      <div className='export_options'>
+        <button onClick={() => exportCanvas('yourstory.png')}>Export</button>
+        <button onClick={exportSlideshow}>Export Slideshow</button>
+      </div>
+
       <Layer data={elements} dataHandler={setElements} />
       <TextWorkFlow  elements={elements} selectelementHandler={setSelectedElement} createElement={createElement} actionhandler={setActionType} elementsHandler={setElements} stage={2} />
       <EditPanel element={selectedElement} elements={elements} elementsHandler={setElements} />
+      {
+        elementType == "slideshow"? <Slideshow
+          slideshow={slideshow}
+          setSlideShow={setSlideShow}
+          elements={elements}
+          setElements={setElements}
+          history={history}
+          setHistory={setHistory}
+          activeSlide={activeSlide}
+          setActiveSlide={setActiveSlide}
+          Preview={Preview}
+         /> : null
+      }
     </div>
   );
   
