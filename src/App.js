@@ -270,7 +270,10 @@ const EditPanel = ({element, elements, elementsHandler}) => {
 }
 
 
-const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHistory, activeSlide, setActiveSlide, Preview}) => {
+const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHistory, activeSlide, setActiveSlide}) => {
+
+  const mediaRecorderRef = useRef(null);
+  const chunksRef = useRef([]);
 
   const addNewSlide = () => {
 
@@ -285,7 +288,8 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
         // backgroundRepeat: bgElement.styles.backgroundRepeat,
         // backgroundSize: bgElement.styles.backgroundSize
       },
-      preview:null
+      preview:null,
+      duration:5000
     }
     setSlideShow((prev) => {
       let newSlideShowArr = [...prev,newSlide]
@@ -351,15 +355,97 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
     
   }
 
+  const captureFrame = (stream) => {
+    const canvas = document.getElementById("canvas1")
+    const track = stream.getVideoTracks()[0];
+    const imageCapture = new ImageCapture(track);
+    try {
+      imageCapture.grabFrame().then((imageBitmap) => {
+        const offscreenCanvas = document.createElement('canvas');
+        const offscreenCtx = offscreenCanvas.getContext('2d');
+  
+        offscreenCanvas.width = canvas.width;
+        offscreenCanvas.height = canvas.height;
+        offscreenCtx.drawImage(imageBitmap, 0, 0);
+  
+        offscreenCanvas.toBlob((blob) => {
+          chunksRef.current.push(blob);
+        }, 'image/png');
+      });
+    } catch (error) {
+      return
+    }
+    
+  };
+
+  const handleDataAvailable = (event) => {
+    if (event.data && event.data.size > 0) {
+      chunksRef.current.push(event.data);
+    }
+  };
+
+  
+
+  const Preview = async () => {
+    const canvas = document.getElementById("canvas1")
+    const ctx1 = canvas.getContext('2d')
+    ctx1.clearRect(0,0,canvas.width,canvas.height)
+    ctx1.fillStyle="#fff"
+    ctx1.fillRect(0,0,canvas.width,canvas.height)
+
+    const canvas1Stream = canvas.captureStream();
+    mediaRecorderRef.current = new MediaRecorder(canvas1Stream);
+    mediaRecorderRef.current.ondataavailable = handleDataAvailable;
+    mediaRecorderRef.current.start();
+
+    const animationInterval = setInterval(() => {
+      console.log("Capturing Frame");
+      captureFrame(canvas1Stream);
+    }, 100);
+
+    let d = 0
+    for (let i = 0; i < slideshow.length; i++) {
+      const slide = slideshow[i];
+      console.log("hey");
+      d = d + slide.duration
+      await setTimeout(async () => {
+        console.log("Inside Timeout");
+         await setElements(slide.elements)
+      },d)
+    }
+
+    d = d + 5000
+
+    setTimeout(async () => {
+      console.log(chunksRef.current);
+      clearInterval(animationInterval);
+      const combinedBlob = new Blob(chunksRef.current, { type: 'video/mp4' });
+      const videoUrl = URL.createObjectURL(combinedBlob);
+      var link = document.createElement("a");
+      link.href = videoUrl;
+      link.download = "abc.mp4";
+      await link.click();
+    },d)
+
+    
+    
+  }
+
+
   console.log(slideshow);
 
   return (
     <div className="slideshow_container">
       {slideshow.map((ins) => {
         return (
+          <>
           <div className="slide" onClick={() => openSlide(ins)}>
             <img src={ins.preview} alt="" />
           </div>
+          <span>Duration: <input type="text" name="" id="" defaultValue={ins.duration} /></span>
+          <br />
+          <br />
+          </>
         )
       })}
       <button onClick={addNewSlide}>Add Slide</button>
@@ -390,7 +476,8 @@ function App() {
     elements:[],
     history:[],
     background: {},
-    preview:null
+    preview:null,
+    duration:0
   }])
 
   const [activeSlide, setActiveSlide] = useState(1)
