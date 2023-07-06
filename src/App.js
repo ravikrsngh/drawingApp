@@ -6,7 +6,13 @@ import Layer from './components/layer/layer';
 import TextWorkFlow from './workflows/textWorkflow';
 import { ColorPicker, useColor } from "react-color-palette";
 import "react-color-palette/lib/css/styles.css";
+import Whammy from 'react-whammy';
+import dummy_music from './dummy_music.mp3'
 
+const stringToDataURI = (str, mimeType) => {
+  const base64String = btoa(str);
+  return `data:${mimeType};base64,${base64String}`;
+};
 
 const exportCanvas = async (filename) => {
   var c = document.getElementById("canvas1");
@@ -289,7 +295,7 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
         // backgroundSize: bgElement.styles.backgroundSize
       },
       preview:null,
-      duration:5000
+      duration:3000
     }
     setSlideShow((prev) => {
       let newSlideShowArr = [...prev,newSlide]
@@ -357,34 +363,44 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
 
   const captureFrame = (stream) => {
     const canvas = document.getElementById("canvas1")
-    const track = stream.getVideoTracks()[0];
-    const imageCapture = new ImageCapture(track);
-    try {
-      imageCapture.grabFrame().then((imageBitmap) => {
-        const offscreenCanvas = document.createElement('canvas');
-        const offscreenCtx = offscreenCanvas.getContext('2d');
+    // const track = stream.getVideoTracks()[0];
+    // const imageCapture = new ImageCapture(track);
+    // try {
+    //   imageCapture.grabFrame().then((imageBitmap) => {
+    //     const offscreenCanvas = document.createElement('canvas');
+    //     const offscreenCtx = offscreenCanvas.getContext('2d');
   
-        offscreenCanvas.width = canvas.width;
-        offscreenCanvas.height = canvas.height;
-        offscreenCtx.drawImage(imageBitmap, 0, 0);
+    //     offscreenCanvas.width = canvas.width;
+    //     offscreenCanvas.height = canvas.height;
+    //     offscreenCtx.drawImage(imageBitmap, 0, 0);
   
-        offscreenCanvas.toBlob((blob) => {
-          chunksRef.current.push(blob);
-        }, 'image/png');
-      });
-    } catch (error) {
-      return
-    }
+        
+    //   });
+    // } catch (error) {
+    //   return
+    // }
+
+    canvas.toBlob((blob) => {
+      chunksRef.current.push(blob);
+    }, 'image/png');
     
   };
 
   const handleDataAvailable = (event) => {
+    console.log("Data Available");
     if (event.data && event.data.size > 0) {
       chunksRef.current.push(event.data);
     }
   };
 
   
+  const generateFrames = (canvas) => {
+    //const img = new Image();
+    const img  = document.createElement('img')
+    img.src = canvas.toDataURL('image/png',1.0);
+    chunksRef.current.push(img)
+    setTimeout(() => generateFrames(canvas),1000/60)
+  }
 
   const Preview = async () => {
     const canvas = document.getElementById("canvas1")
@@ -393,38 +409,58 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
     ctx1.fillStyle="#fff"
     ctx1.fillRect(0,0,canvas.width,canvas.height)
 
-    const canvas1Stream = canvas.captureStream();
-    mediaRecorderRef.current = new MediaRecorder(canvas1Stream);
+    const canvas1Stream = canvas.captureStream(60);
+    
+    mediaRecorderRef.current = new MediaRecorder(canvas1Stream,{ mimeType: 'video/webm' });
     mediaRecorderRef.current.ondataavailable = handleDataAvailable;
     mediaRecorderRef.current.start();
 
-    const animationInterval = setInterval(() => {
-      console.log("Capturing Frame");
-      captureFrame(canvas1Stream);
-    }, 100);
+    generateFrames(canvas)
+    
 
     let d = 0
     for (let i = 0; i < slideshow.length; i++) {
       const slide = slideshow[i];
       console.log("hey");
-      d = d + slide.duration
       await setTimeout(async () => {
         console.log("Inside Timeout");
          await setElements(slide.elements)
       },d)
+      d = d + 3000
     }
 
-    d = d + 5000
 
     setTimeout(async () => {
       console.log(chunksRef.current);
-      clearInterval(animationInterval);
-      const combinedBlob = new Blob(chunksRef.current, { type: 'video/mp4' });
-      const videoUrl = URL.createObjectURL(combinedBlob);
-      var link = document.createElement("a");
-      link.href = videoUrl;
-      link.download = "abc.mp4";
-      await link.click();
+      // clearInterval(animationInterval);
+      // const combinedBlob = new Blob(chunksRef.current, { type: 'video/webm' });
+      
+      const video = new Whammy.Video(60);
+      var audio = document.getElementById('slide_music');
+      audio.play();
+      for (let i = 0; i < chunksRef.current.length; i++) {
+        const ele = chunksRef.current[i];
+        const temp_canvas = document.createElement('canvas');
+        temp_canvas.width = canvas.width;
+        temp_canvas.height = canvas.height;
+          const temp_ctx = temp_canvas.getContext('2d');
+          temp_ctx.drawImage(ele, 0, 0);
+          video.add(temp_ctx);
+      }
+
+      audio.pause();
+      audio.currentTime = 0;
+
+      video.compile(false,(output) => {
+        console.log("Start Compiling")
+        const videoUrl = URL.createObjectURL(output);
+        var link = document.createElement("a");
+        link.href = videoUrl;
+        link.download = "abc.mp4";
+        link.click();
+      });
+      
+      chunksRef.current = []
     },d)
 
     
@@ -450,6 +486,9 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
       })}
       <button onClick={addNewSlide}>Add Slide</button>
       <button onClick={Preview}>Preview</button>
+      <audio controls id='slide_music'>
+        <source src={dummy_music} type="audio/mp3"/>
+      </audio>
     </div>
   )
 }
@@ -477,7 +516,7 @@ function App() {
     history:[],
     background: {},
     preview:null,
-    duration:0
+    duration:3000
   }])
 
   const [activeSlide, setActiveSlide] = useState(1)
@@ -1305,6 +1344,7 @@ function App() {
 
   return (
     <div className="App">
+  
       <div className='canvas_wrapper' id="canvas_wrapper">
       <canvas
         id='canvas1'
