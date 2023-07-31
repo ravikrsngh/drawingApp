@@ -7,7 +7,9 @@ import TextWorkFlow from './workflows/textWorkflow';
 import { ColorPicker, useColor } from "react-color-palette";
 import "react-color-palette/lib/css/styles.css";
 import Whammy from 'react-whammy';
-import dummy_music from './dummy_music.mp3'
+import dummy_music from './dummy_music.mp3';
+import temp1 from './templates/temp1.png'
+import temp2 from './templates/temp2.png'
 
 const stringToDataURI = (str, mimeType) => {
   const base64String = btoa(str);
@@ -402,7 +404,7 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
     setTimeout(() => generateFrames(canvas),1000/60)
   }
 
-  const Preview = async () => {
+  const Preview = async () => { 
     const canvas = document.getElementById("canvas1")
     const ctx1 = canvas.getContext('2d')
     ctx1.clearRect(0,0,canvas.width,canvas.height)
@@ -411,11 +413,11 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
 
     const canvas1Stream = canvas.captureStream(60);
     
-    mediaRecorderRef.current = new MediaRecorder(canvas1Stream,{ mimeType: 'video/webm' });
+    mediaRecorderRef.current = new MediaRecorder(canvas1Stream,{ mimeType: "video/webm; codecs=vp9" });
     mediaRecorderRef.current.ondataavailable = handleDataAvailable;
-    mediaRecorderRef.current.start();
+    mediaRecorderRef.current.start(60);
 
-    generateFrames(canvas)
+    // generateFrames(canvas)
     
 
     let d = 0
@@ -492,7 +494,7 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
     </div>
   )
 }
-
+  
 
 function App() {
   const [elementType,setElementType] = useState(null)
@@ -509,6 +511,397 @@ function App() {
   const [animationStartTime,setAnimationStartTime] = useState(null)
   const [animationTimeline, setAnimationTimeline] = useState([])
   const [animationFrame,setAnimationFrame] = useState([])
+
+  const templates = [
+    {
+      id: 1,
+      img:temp1,
+      elements : [
+        {
+            "id": 0,
+            "type": "background",
+            "x1": 17,
+            "y1": 318,
+            "x2": 18,
+            "y2": 319,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 1,
+            "type": "rectangle",
+            "x1": 23,
+            "y1": 30,
+            "x2": 677,
+            "y2": 109,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 2,
+            "type": "rectangle",
+            "x1": 26,
+            "y1": 635,
+            "x2": 675,
+            "y2": 690,
+            "data": {
+                "style": {
+                    "fillStyle": "#66c5f4",
+                    "strokeStyle": "#000000",
+                    "lineWidth": "0",
+                    "shadowColor": "#000000",
+                    "shadowBlur": "0",
+                    "shadowOffsetX": "0",
+                    "shadowOffsetY": "0",
+                    "globalAlpha": "1"
+                }
+            }
+        },
+        {
+            "id": 3,
+            "type": "text",
+            "x1": 234,
+            "y1": 59,
+            "x2": 441.1640625,
+            "y2": 91,
+            "data": {
+                "text": "HAPPY BIRTHDAY",
+                "style": {
+                    "color": "black",
+                    "fontStyle": "Arial",
+                    "fontSize": "24px",
+                    "fontBold": false,
+                    "fontItalic": false,
+                    "textAlign": "left",
+                    "letterSpacing": 0,
+                    "lineHeight": 32,
+                    "opacity": 1,
+                    "lineWidth": 0,
+                    "strokeStyle": "",
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0
+                }
+            }
+        },
+        {
+            "id": 4,
+            "type": "line",
+            "x1": 50,
+            "y1": 159,
+            "x2": 78,
+            "y2": 178,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 5,
+            "type": "line",
+            "x1": 72,
+            "y1": 156,
+            "x2": 48,
+            "y2": 180,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 6,
+            "type": "line",
+            "x1": 671,
+            "y1": 20,
+            "x2": 685,
+            "y2": 35,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 7,
+            "type": "line",
+            "x1": 684,
+            "y1": 22,
+            "x2": 668,
+            "y2": 38,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 8,
+            "type": "line",
+            "x1": 407,
+            "y1": 236,
+            "x2": 461,
+            "y2": 443,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        }
+    ]
+    },
+    {
+      id:2,
+      img:temp2,
+      elements:[
+        {
+            "id": 0,
+            "type": "rectangle",
+            "x1": 226,
+            "y1": 26,
+            "x2": 436,
+            "y2": 221,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 1,
+            "type": "text",
+            "x1": 201,
+            "y1": 108,
+            "x2": 460.640625,
+            "y2": 140,
+            "data": {
+                "text": "HAPPY ANNIVERSARY",
+                "style": {
+                    "color": "black",
+                    "fontStyle": "Arial",
+                    "fontSize": "24px",
+                    "fontBold": false,
+                    "fontItalic": false,
+                    "textAlign": "left",
+                    "letterSpacing": 0,
+                    "lineHeight": 32,
+                    "opacity": 1,
+                    "lineWidth": 0,
+                    "strokeStyle": "",
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0
+                }
+            }
+        },
+        {
+            "id": 2,
+            "type": "line",
+            "x1": 35,
+            "y1": 37,
+            "x2": 31,
+            "y2": 678,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 3,
+            "type": "line",
+            "x1": 31,
+            "y1": 678,
+            "x2": 674,
+            "y2": 680,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 4,
+            "type": "line",
+            "x1": 674,
+            "y1": 680,
+            "x2": 674,
+            "y2": 17,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 5,
+            "type": "line",
+            "x1": 34,
+            "y1": 38,
+            "x2": 34,
+            "y2": 16,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 6,
+            "type": "line",
+            "x1": 34,
+            "y1": 16,
+            "x2": 674,
+            "y2": 18,
+            "data": {
+                "style": {
+                    "fillStyle": "#F5F5F5",
+                    "strokeStyle": "#000",
+                    "lineWidth": 0,
+                    "shadowColor": "",
+                    "shadowBlur": 0,
+                    "shadowOffsetX": 0,
+                    "shadowOffsetY": 0,
+                    "globalAlpha": 1
+                }
+            }
+        },
+        {
+            "id": 7,
+            "type": "rectangle",
+            "x1": 12,
+            "y1": 635,
+            "x2": 66,
+            "y2": 694,
+            "data": {
+                "style": {
+                    "fillStyle": "#fda8f3",
+                    "strokeStyle": "#000000",
+                    "lineWidth": "0",
+                    "shadowColor": "#000000",
+                    "shadowBlur": "0",
+                    "shadowOffsetX": "0",
+                    "shadowOffsetY": "0",
+                    "globalAlpha": "1"
+                }
+            }
+        },
+        {
+            "id": 8,
+            "type": "rectangle",
+            "x1": 649,
+            "y1": 6,
+            "x2": 690,
+            "y2": 49,
+            "data": {
+                "style": {
+                    "fillStyle": "#af5be0",
+                    "strokeStyle": "#000000",
+                    "lineWidth": "0",
+                    "shadowColor": "#000000",
+                    "shadowBlur": "0",
+                    "shadowOffsetX": "0",
+                    "shadowOffsetY": "0",
+                    "globalAlpha": "1"
+                }
+            }
+        }
+    ]
+    }
+  ]
 
   const [slideshow, setSlideShow] = useState([{
     id:1,
@@ -1402,6 +1795,23 @@ function App() {
           </div>
         </>
       ):null}
+      {elementType == 'templates'? (
+        <>
+          <div className='tool_settings'>
+            <h4>Choose Templates</h4>
+            <div className='tool_settings_gallery'>
+              {templates.map((ins) => {
+                return (
+                  <div className='tool_settings_gallery_img' onClick={() => setElements(ins.elements)}>
+                    <img src={ins.img} alt="" />
+                  </div>
+                )
+              })}
+              
+            </div>
+          </div>
+        </>
+      ):null}
       {actionType === "writing" ? (
         <textarea
           ref={textAreaRef}
@@ -1441,9 +1851,13 @@ function App() {
           <img src={cardicon} />
           <span>Rectangle</span>
         </div>
-        <div className="toolbar_card" onClick={() => setElementType('circle')}>
+        {/* <div className="toolbar_card" onClick={() => setElementType('circle')}>
           <img src={cardicon} />
           <span>Circle</span>
+        </div> */}
+        <div className="toolbar_card" onClick={() => setElementType('templates')}>
+          <img src={cardicon} />
+          <span>Templates</span>
         </div>
         <div className="toolbar_card" onClick={() => setElementType('select')}>
           <img src={cardicon} />
