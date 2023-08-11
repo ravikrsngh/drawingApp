@@ -22,7 +22,7 @@ const exportCanvas = async (filename) => {
     img.src = c.toDataURL('image/png',1.0)
     var link = document.createElement("a");
     link.href = img.src;
-    link.download = filename;
+    link.download = "abc.png";
     await link.click();
 }
 
@@ -499,6 +499,8 @@ const Slideshow = ({slideshow,setSlideShow,elements,setElements, history,setHist
 function App() {
   const [elementType,setElementType] = useState(null)
   const [actionType,setActionType] = useState(null)
+
+  //list of all the elements inside the canvas
   const [elements,setElements] = useState([])
   const [history,setHistory] = useState([])
   const [drawing,setDrawing] = useState(false)
@@ -1359,6 +1361,12 @@ function App() {
       // Creating a stroke rectangle
       ctx.strokeStyle="#ACCEF7"
       ctx.strokeRect(x1,y1,x2-x1,y2-y1)
+    }else if (type == "resize-box") {
+      // Creating a stroke rectangle
+      ctx.strokeStyle="#ACCEF7"
+      ctx.fillStyle="#ACCEF7"
+      ctx.strokeRect(x1,y1,x2-x1,y2-y1)
+      ctx.fillRect(x1,y1,x2-x1,y2-y1)
     } else if (type == "circle") {
       //Creating a circle
       let radius = Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2))
@@ -1444,6 +1452,13 @@ function App() {
         console.log(x,y);
         isElement= x >= minX && x <=maxX && y >= minY && y <=maxY
         console.log(isElement);
+        boundingBox = {
+          type:"stroke-rectangle",
+          x1:element.x1,
+          x2:element.x2,
+          y1:element.y1,
+          y2:element.y2
+        }
       }
       if(isElement) {
         return {
@@ -1542,6 +1557,13 @@ function App() {
             shadowOffsetX:0,
             shadowOffsetY:0,
             globalAlpha:1
+          },
+          boundingBox:{
+            type:"stroke-rectangle",
+            x1:clientX -  canvasRef.current.offsetLeft,
+            y1:clientY - canvasRef.current.offsetTop,
+            x2:clientX -  canvasRef.current.offsetLeft,
+            y2:clientY - canvasRef.current.offsetTop,
           }
         },
       )
@@ -1700,8 +1722,8 @@ function App() {
     }
   }
 
-  const Preview = () => {
-    console.log("hey");
+  const Preview = (x1,y1,x2,y2) => {
+    let tr = []
   }
 
   useEffect(() => {
@@ -1712,13 +1734,28 @@ function App() {
     ctx1.clearRect(0,0,canvas.width,canvas.height)
     ctx1.fillStyle="#fff"
     ctx1.fillRect(0,0,canvas.width,canvas.height)
+    let se = {}
     elements.forEach(element => {
+      if (selectedElement) {
+        if (selectedElement.element.id == element.id) {
+          se = element
+        }
+      }
       drawElement(element.type, element.x1,element.y1,element.x2,element.y2,element.data)
     });
-    // if (selectedElement) {
-    //   drawElement(selectedElement.boundingBox.type, selectedElement.boundingBox.x1,selectedElement.boundingBox.y1,selectedElement.boundingBox.x2,selectedElement.boundingBox.y2,{})
-    // }
-  }, [elements])
+    if (selectedElement && se.type != "line") {
+      drawElement("stroke-rectangle", se.x1,se.y1,se.x2,se.y2,{})
+      //const resizingBoxes = getResizingBoxes(se.x1,se.y1,se.x2,se.y2)
+      drawElement("resize-box", se.x1-5,se.y1-5,se.x1+5,se.y1+5 ,{})
+      drawElement("resize-box", se.x1-5,se.y2-5,se.x1+5,se.y2+5 ,{})
+      drawElement("resize-box", se.x2-5,se.y1-5,se.x2+5,se.y1+5 ,{})
+      drawElement("resize-box", se.x2-5,se.y2-5,se.x2+5,se.y2+5 ,{})
+    } else if (selectedElement && se.type == "line") {
+      drawElement("stroke-line", se.x1,se.y1,se.x2,se.y2,{})
+      drawElement("resize-box", se.x1-5,se.y1-5,se.x1+5,se.y1+5 ,{})
+      drawElement("resize-box", se.x2-5,se.y2-5,se.x2+5,se.y2+5 ,{})
+    }
+  }, [elements,selectedElement, actionType])
 
   // useEffect(() => {
   //   console.log(elements);
