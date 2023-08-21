@@ -92,8 +92,7 @@ const EditPanel = ({element, elements, elementsHandler}) => {
     document.getElementById('font_size').value = e.target.value
   }
 
-
-  if(element?.element.type == "rectangle"){
+  if(element?.element.type == "rectangle" || element?.element.type == "circle"){
     
     return (
       <div className="edit_panel_container">
@@ -1028,6 +1027,7 @@ function App() {
   const getCoordinates = (element) => {
     switch (element.type) {
       case "img":
+      case "circle":
       case "rectangle":
         let minX = Math.min(element.x1,element.x2)
         let maxX = Math.max(element.x1,element.x2)
@@ -1081,6 +1081,7 @@ function App() {
           }
           break;
         case "img":
+        case "circle":
         case "rectangle":
           if (x >= coordinates.x1 - 10 && x <= coordinates.x1 + 10 && y >= coordinates.y1 - 10 && y <= coordinates.y1 + 10) {
             return {
@@ -1152,6 +1153,7 @@ function App() {
         }
         elementsCopy[index] = createElement(id,type, newX1, newY1, newX2, newY2,data);
         break;
+      case "circle":
       case "rectangle":
         if (from == "tl") {
           newX1 += diff.x
@@ -1229,6 +1231,7 @@ function App() {
     console.log(elementsCopy);
     switch (type) {
       case "line":
+      case "circle":
       case "rectangle":
         newX1 = x1 + drag.x
         newY1 = y1 + drag.y
@@ -1369,11 +1372,17 @@ function App() {
       ctx.fillRect(x1,y1,x2-x1,y2-y1)
     } else if (type == "circle") {
       //Creating a circle
+
+      let xradius = (x2-x1)/2;
+      let yradius = (y2-y1)/2;
       let radius = Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2))
       ctx.beginPath();
-      ctx.strokeStyle="#000"
-      ctx.arc(x1, y1, radius,0, Math.PI * 2, true);
-      ctx.stroke()
+      for (const property in data.style) {
+        ctx[property] = data.style[property]
+      }
+      
+      ctx.ellipse((x2+x1)/2, (y2+y1)/2, Math.abs((x2-x1)/2), Math.abs((y2-y1)/2), 0, 0,2 * Math.PI);
+      ctx.fill()
       ctx.closePath()
     } else if (type == "img") {
       for (const property in data.style) {
@@ -1411,7 +1420,7 @@ function App() {
     let boundingBox = null
     for (var i = 0; i < elements.length; i++) {
       let element = elements[elements.length - i - 1]
-      if (element.type == "rectangle" || element.type == "img") {
+      if (element.type == "rectangle" || element.type == "img" || element.type == "circle") {
         let minX = Math.min(element.x1,element.x2)
         let maxX = Math.max(element.x1,element.x2)
         let minY = Math.min(element.y1,element.y2)
@@ -1888,10 +1897,10 @@ function App() {
           <img src={cardicon} />
           <span>Rectangle</span>
         </div>
-        {/* <div className="toolbar_card" onClick={() => setElementType('circle')}>
+        <div className="toolbar_card" onClick={() => setElementType('circle')}>
           <img src={cardicon} />
           <span>Circle</span>
-        </div> */}
+        </div>
         <div className="toolbar_card" onClick={() => setElementType('templates')}>
           <img src={cardicon} />
           <span>Templates</span>
